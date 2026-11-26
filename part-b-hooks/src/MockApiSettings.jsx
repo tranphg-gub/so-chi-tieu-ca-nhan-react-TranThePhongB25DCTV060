@@ -6,9 +6,17 @@ function parseEndpoint(value) {
   try {
     const url = new URL(value.trim())
     const path = url.pathname.replace(/\/+$/, '')
-    if (url.protocol !== 'https:' || !/^[a-z0-9-]+\.mockapi\.io$/i.test(url.hostname)
-      || url.port || url.username || url.password || url.search || url.hash
-      || !/\/[a-z][\w-]*$/i.test(path)) return ''
+    if (
+      url.protocol !== 'https:' ||
+      !/^[a-z0-9-]+\.mockapi\.io$/i.test(url.hostname) ||
+      url.port ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
+      !/\/[a-z][\w-]*$/i.test(path)
+    )
+      return ''
 
     return `${url.origin}${path}`
   } catch {
@@ -48,7 +56,9 @@ export default function MockApiSettings({ endpoint, onConnect, busy }) {
     if (busy) return
     const value = parseEndpoint(draft)
     if (!value) {
-      setError('Nhập URL HTTPS đầy đủ của resource trên MockAPI, ví dụ https://demo.mockapi.io/expenses.')
+      setError(
+        'Nhập URL HTTPS đầy đủ của resource trên MockAPI, ví dụ https://demo.mockapi.io/expenses.',
+      )
       return
     }
     connect(value)
@@ -58,31 +68,42 @@ export default function MockApiSettings({ endpoint, onConnect, busy }) {
     <details className="card api-settings" open={!endpoint}>
       <summary>Kết nối MockAPI</summary>
       <form className="form" onSubmit={handleSubmit} noValidate>
-      <div className="form-grid api-grid">
-        <label htmlFor="mockapi-url">
-          URL resource MockAPI
-          <input
-            id="mockapi-url"
-            type="url"
-            value={draft}
-            placeholder="https://demo.mockapi.io/expenses"
-            autoComplete="off"
-            spellCheck={false}
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? 'mockapi-help mockapi-error' : 'mockapi-help'}
-            onChange={event => { setDraft(event.target.value); setError('') }}
-          />
-        </label>
-        <button type="submit" className="primary" disabled={busy}>Lưu và kết nối</button>
-        {endpoint && (
-          <button type="button" className="secondary" disabled={busy} onClick={() => connect('')}>
-            Ngắt kết nối
+        <div className="form-grid api-grid">
+          <label htmlFor="mockapi-url">
+            URL resource MockAPI
+            <input
+              id="mockapi-url"
+              type="url"
+              value={draft}
+              placeholder="https://demo.mockapi.io/expenses"
+              autoComplete="off"
+              spellCheck={false}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'mockapi-help mockapi-error' : 'mockapi-help'}
+              onChange={event => {
+                setDraft(event.target.value)
+                setError('')
+              }}
+            />
+          </label>
+          <button type="submit" className="primary" disabled={busy}>
+            Lưu và kết nối
           </button>
+          {endpoint && (
+            <button type="button" className="secondary" disabled={busy} onClick={() => connect('')}>
+              Ngắt kết nối
+            </button>
+          )}
+        </div>
+        <p id="mockapi-help">
+          Dán URL resource chứa các khoản chi. Ứng dụng lưu URL trên trình duyệt này.
+        </p>
+        {error && (
+          <p id="mockapi-error" role="alert">
+            {error}
+          </p>
         )}
-      </div>
-      <p id="mockapi-help">Dán URL resource chứa các khoản chi. Ứng dụng lưu URL trên trình duyệt này.</p>
-      {error && <p id="mockapi-error" role="alert">{error}</p>}
-      {storageNotice && <p role="status">{storageNotice}</p>}
+        {storageNotice && <p role="status">{storageNotice}</p>}
       </form>
     </details>
   )

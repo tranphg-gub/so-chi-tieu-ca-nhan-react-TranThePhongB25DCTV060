@@ -1,11 +1,16 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState('light')
-  const value = useMemo(() => ({ theme, toggleTheme: () => setTheme(current => current === 'light' ? 'dark' : 'light') }), [theme])
-  return <ThemeContext.Provider value={value}><div className={`app theme-${theme}`}>{children}</div></ThemeContext.Provider>
+  const toggleTheme = () => setTheme(current => (current === 'light' ? 'dark' : 'light'))
+  const value = { theme, toggleTheme }
+  return (
+    <ThemeContext.Provider value={value}>
+      <div className={`app theme-${theme}`}>{children}</div>
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {
@@ -13,4 +18,3 @@ export function useTheme() {
   if (!context) throw new Error('useTheme phải được dùng trong ThemeProvider')
   return context
 }
-
