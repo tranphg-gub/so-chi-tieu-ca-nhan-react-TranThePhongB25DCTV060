@@ -1,5 +1,17 @@
 @import '../../part-a-class/src/styles.css';
 
+.api-settings { margin-bottom: 24px; }
+.api-settings + .stats { margin-top: 0; }
+.api-settings h2 { margin-bottom: 12px; }
+.api-grid { grid-template-columns: minmax(0, 1fr) auto auto; align-items: end; }
+.api-settings p { margin: 10px 0 0; font-size: .9rem; }
+.api-settings [role="alert"] { color: #a52634; }
+.secondary { min-height: 44px; padding: 0 14px; border: 1px solid #cdd8d2; border-radius: 10px; color: inherit; background: transparent; }
+.secondary:disabled { cursor: wait; opacity: .65; }
+.theme-dark .api-settings input { background: #18231e; border-color: #52645b; color: inherit; }
+.theme-dark .api-settings [role="alert"] { color: #ffc6cc; }
+@media (max-width: 650px) { .api-grid { grid-template-columns: 1fr; } }
+
 .app { min-height: 100vh; background: #f4f7f3; color: #17201d; transition: background .2s, color .2s; }
 .header-actions { display: flex; align-items: center; gap: 20px; }
 .theme-button { border: 1px solid rgba(255,255,255,.45); color: white; background: rgba(255,255,255,.1); border-radius: 999px; padding: 10px 14px; white-space: nowrap; }

@@ -1,23 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 
 export function useFetch(url) {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(Boolean(url))
   const [error, setError] = useState('')
 
   const refetch = useCallback(async (signal) => {
-    if (!url || url.includes('YOUR_PROJECT_ID')) {
-      setLoading(false)
-      setError('Chưa cấu hình VITE_API_URL. Hãy sao chép .env.example thành .env và nhập URL resource expenses trên MockAPI.')
-      return
-    }
+    if (!url) return
     setLoading(true)
     setError('')
     try {
       const response = await fetch(url, { signal })
       if (!response.ok) throw new Error(`Không thể tải dữ liệu (HTTP ${response.status}).`)
       const result = await response.json()
-      setData(Array.isArray(result) ? result : [])
+      if (!Array.isArray(result) || result.some(item => item?.id == null)) {
+        throw new Error('URL cần trả về danh sách khoản chi. Kiểm tra lại URL resource.')
+      }
+      if (!signal?.aborted) setData(result)
     } catch (requestError) {
       if (requestError.name !== 'AbortError') setError(requestError.message || 'Đã xảy ra lỗi khi tải dữ liệu.')
     } finally {

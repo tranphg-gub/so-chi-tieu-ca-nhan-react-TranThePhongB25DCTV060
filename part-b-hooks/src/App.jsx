@@ -3,12 +3,11 @@ import { useTheme } from './ThemeContext'
 import { useClock } from './hooks/useClock'
 import { useDebounce } from './hooks/useDebounce'
 import { useFetch } from './hooks/useFetch'
+import MockApiSettings, { readEndpoint } from './MockApiSettings'
 
 const CATEGORIES = ['Ăn uống', 'Đi lại', 'Học tập', 'Giải trí']
 const MONEY = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
-const API_URL = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '')
-
-const normalizeExpense = item => ({ ...item, amount: Number(item.amount) || 0 })
+const normalizeExpense = item => ({ ...item, content: String(item.content ?? ''), amount: Number(item.amount) || 0 })
 
 function Clock() {
   const now = useClock()
@@ -52,35 +51,72 @@ function Statistics({ total, expenses }) {
 }
 
 export default function App() {
+  const [connection, setConnection] = useState(() => ({ url: readEndpoint(), revision: 0 }))
+  const [showClock, setShowClock] = useState(true)
+  const [busy, setBusy] = useState(false)
+
+  return (
+    <>
+      <Header showClock={showClock} onToggleClock={() => setShowClock(current => !current)} />
+      <main>
+        <MockApiSettings
+          endpoint={connection.url}
+          busy={busy}
+          onConnect={url => setConnection(previous => ({ url, revision: previous.revision + 1 }))}
+        />
+        <ExpenseWorkspace key={connection.revision} url={connection.url} setBusy={setBusy} />
+      </main>
+      <footer>Function Components + Hooks · React</footer>
+    </>
+  )
+}
+
+function ExpenseWorkspace({ url, setBusy }) {
   const [filter, setFilter] = useState('Tất cả')
   const [search, setSearch] = useState('')
-  const [showClock, setShowClock] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const debouncedSearch = useDebounce(search, 400)
-  const { data, setData, loading, error, setError, request } = useFetch(API_URL)
-  const expenses = useMemo(() => data.map(normalizeExpense), [data])
+  const { data, setData, loading, error, setError, request } = useFetch(url)
+  const expenses = useMemo(() => data?.map(normalizeExpense) ?? [], [data])
   const visible = useMemo(() => expenses.filter(item => (filter === 'Tất cả' || item.category === filter) && item.content.toLocaleLowerCase('vi').includes(debouncedSearch.trim().toLocaleLowerCase('vi'))), [expenses, filter, debouncedSearch])
   const total = useMemo(() => visible.reduce((sum, item) => sum + item.amount, 0), [visible])
   useEffect(() => { document.title = `${MONEY.format(total)} · Sổ chi tiêu` }, [total])
 
   const handleAdd = async expense => {
-    if (!API_URL) { setError('Chưa cấu hình VITE_API_URL nên không thể thêm dữ liệu.'); return false }
+    if (submitting || deletingId != null) return false
+    setBusy(true)
     setSubmitting(true)
     try { const created = await request({ method: 'POST', body: JSON.stringify(expense) }); setData(current => [created, ...current]); return true }
     catch (requestError) { setError(requestError.message); return false }
-    finally { setSubmitting(false) }
+    finally { setSubmitting(false); setBusy(false) }
   }
   const deleteExpense = async expense => {
-    if (!window.confirm(`Xóa khoản chi “${expense.content}”?`)) return
+    if (submitting || deletingId != null || !window.confirm(`Xóa khoản chi “${expense.content}”?`)) return
+    setBusy(true)
     setDeletingId(expense.id); setError('')
     try {
       await request({ method: 'DELETE' }, expense.id)
       setData(current => current.filter(item => item.id !== expense.id))
     } catch (requestError) { setError(requestError.message || 'Đã xảy ra lỗi khi xóa dữ liệu.') }
-    finally { setDeletingId(null) }
+    finally { setDeletingId(null); setBusy(false) }
   }
 
-  return <><Header showClock={showClock} onToggleClock={() => setShowClock(current => !current)} /><main><Statistics total={total} expenses={expenses} /><ExpenseForm onAdd={handleAdd} submitting={submitting} />{error && <div className="notice error" role="alert"><strong>Không thể đồng bộ MockAPI.</strong><span>{error}</span></div>}<Filters value={filter} onChange={setFilter} search={search} onSearch={setSearch} />{loading ? <div className="card loading">Đang tải dữ liệu…</div> : <ExpenseList expenses={visible} onDelete={deleteExpense} deletingId={deletingId} />}</main><footer>Function Components + Hooks · React</footer></>
+  if (!url) return <p role="status">Nhập URL MockAPI để bắt đầu ghi khoản chi.</p>
+
+  return (
+    <>
+      <Statistics total={total} expenses={expenses} />
+      {error && <div className="notice error" role="alert"><strong>Không thể đồng bộ MockAPI.</strong><span>{error}</span></div>}
+      {loading && <div className="card loading" role="status">Đang tải dữ liệu…</div>}
+      {data !== null && (
+        <>
+          <ExpenseForm onAdd={handleAdd} submitting={submitting} />
+          <Filters value={filter} onChange={setFilter} search={search} onSearch={setSearch} />
+          <ExpenseList expenses={visible} onDelete={deleteExpense} deletingId={deletingId} />
+        </>
+      )}
+    </>
+  )
 }
 
