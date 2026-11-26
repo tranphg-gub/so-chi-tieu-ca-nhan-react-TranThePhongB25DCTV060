@@ -1,0 +1,7 @@
+packages:
+  - part-a-class
+  - part-b-hooks
+
+confirmModulesPurge: false
+allowBuilds:
+  esbuild: true

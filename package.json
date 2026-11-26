@@ -1,0 +1,12 @@
+{
+  "name": "so-chi-tieu-ca-nhan",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["part-a-class", "part-b-hooks"],
+  "scripts": {
+    "dev:a": "npm run dev --workspace part-a-class",
+    "dev:b": "npm run dev --workspace part-b-hooks",
+    "build": "npm run build --workspaces"
+  }
+}
+
