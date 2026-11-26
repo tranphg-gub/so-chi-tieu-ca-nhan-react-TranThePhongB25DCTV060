@@ -31,11 +31,15 @@ Kiểm tra cả hai bản build:
 npm run build
 ```
 
+Nếu dùng pnpm, chạy `pnpm install --frozen-lockfile` ở thư mục gốc. Dùng
+`pnpm --filter part-a-class run dev` hoặc `pnpm --filter part-b-hooks run dev`
+để mở từng bản và `pnpm --recursive run build` để build cả hai.
+
 ## Cấu hình MockAPI cho Phần B
 
 1. Tạo project trên MockAPI và resource tên `expenses`.
 2. Tạo file `part-b-hooks/.env` từ `part-b-hooks/.env.example`.
-3. Thay URL mẫu bằng URL resource thật, ví dụ:
+3. Sao chép URL đầy đủ của resource `expenses` từ MockAPI. Giữ nguyên tiền tố đường dẫn nếu project có thiết lập tiền tố.
 
 ```env
 VITE_API_URL=https://YOUR_PROJECT_ID.mockapi.io/api/v1/expenses
@@ -43,7 +47,7 @@ VITE_API_URL=https://YOUR_PROJECT_ID.mockapi.io/api/v1/expenses
 
 Các trường của resource: `content` (string), `amount` (number), `category` (string), `date` (string).
 
-Không đưa file `.env` chứa URL riêng lên GitHub. Khi chưa cấu hình URL, Phần B sẽ hiển thị hướng dẫn thay vì tự dùng dữ liệu giả.
+File `.env` được Git bỏ qua. Vì `VITE_API_URL` xuất hiện trong mã chạy phía trình duyệt và resource cho phép thêm/xóa, hãy dùng MockAPI với dữ liệu minh họa. Khi chưa cấu hình URL, Phần B hiển thị hướng dẫn cấu hình.
 
 ## Hooks đã khắc phục thách thức của Class như thế nào?
 

@@ -31,11 +31,13 @@ export function useFetch(url) {
     return () => controller.abort()
   }, [refetch])
 
-  const request = useCallback(async (options) => {
+  const request = useCallback(async (options, itemId) => {
     setError('')
-    const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options })
+    const endpoint = itemId == null ? url : `${url}/${encodeURIComponent(itemId)}`
+    const headers = options.body ? { 'Content-Type': 'application/json' } : undefined
+    const response = await fetch(endpoint, { ...options, headers })
     if (!response.ok) throw new Error(`Yêu cầu thất bại (HTTP ${response.status}).`)
-    return response.status === 204 ? null : response.json()
+    return options.method === 'DELETE' || response.status === 204 ? null : response.json()
   }, [url])
 
   return { data, setData, loading, error, setError, request, refetch }

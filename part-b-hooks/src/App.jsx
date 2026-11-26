@@ -6,7 +6,7 @@ import { useFetch } from './hooks/useFetch'
 
 const CATEGORIES = ['Ăn uống', 'Đi lại', 'Học tập', 'Giải trí']
 const MONEY = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
-const API_URL = import.meta.env.VITE_API_URL || ''
+const API_URL = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '')
 
 const normalizeExpense = item => ({ ...item, amount: Number(item.amount) || 0 })
 
@@ -75,8 +75,7 @@ export default function App() {
     if (!window.confirm(`Xóa khoản chi “${expense.content}”?`)) return
     setDeletingId(expense.id); setError('')
     try {
-      const response = await fetch(`${API_URL}/${expense.id}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error(`Không thể xóa (HTTP ${response.status}).`)
+      await request({ method: 'DELETE' }, expense.id)
       setData(current => current.filter(item => item.id !== expense.id))
     } catch (requestError) { setError(requestError.message || 'Đã xảy ra lỗi khi xóa dữ liệu.') }
     finally { setDeletingId(null) }
