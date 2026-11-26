@@ -16,7 +16,7 @@ function Clock() {
 
 function Header({ showClock, onToggleClock }) {
   const { theme, toggleTheme } = useTheme()
-  return <header><div><p className="eyebrow">PHẦN B · FUNCTION COMPONENT + HOOKS</p><h1>Sổ chi tiêu cá nhân</h1><p>Ghi chép gọn gàng, kiểm soát rõ ràng.</p></div><div className="header-actions"><div className="clock-box">{showClock ? <Clock /> : <span>Đồng hồ đang ẩn</span>}<button className="link-button" onClick={onToggleClock}>{showClock ? 'Ẩn đồng hồ' : 'Hiện đồng hồ'}</button></div><button className="theme-button" onClick={toggleTheme} aria-label="Đổi chế độ màu">{theme === 'light' ? 'Chế độ tối' : 'Chế độ sáng'}</button></div></header>
+  return <header><div><p className="version">Phần B / Function Component + Hooks</p><h1>Sổ chi tiêu cá nhân</h1></div><div className="header-actions"><div className="clock-box">{showClock ? <Clock /> : <span>Đồng hồ đang ẩn</span>}<button className="link-button" onClick={onToggleClock}>{showClock ? 'Ẩn đồng hồ' : 'Hiện đồng hồ'}</button></div><button className="theme-button" onClick={toggleTheme} aria-label="Đổi chế độ màu">{theme === 'light' ? 'Chế độ tối' : 'Chế độ sáng'}</button></div></header>
 }
 
 function ExpenseForm({ onAdd, submitting }) {
@@ -34,16 +34,30 @@ function ExpenseForm({ onAdd, submitting }) {
     const added = await onAdd({ ...form, content: form.content.trim(), amount: Number(form.amount) })
     if (added) { setForm(current => ({ ...current, content: '', amount: '' })); contentRef.current?.focus() }
   }
-  return <form className="card form" onSubmit={handleSubmit} noValidate><div className="section-title"><div><p className="eyebrow">KHOẢN CHI MỚI</p><h2>Thêm giao dịch</h2></div></div><div className="form-grid"><label className="wide">Nội dung<input ref={contentRef} name="content" value={form.content} onChange={handleChange} placeholder="Ví dụ: Ăn trưa" />{errors.content && <small>{errors.content}</small>}</label><label>Số tiền (đ)<input name="amount" type="number" min="1" value={form.amount} onChange={handleChange} placeholder="50000" />{errors.amount && <small>{errors.amount}</small>}</label><label>Loại<select name="category" value={form.category} onChange={handleChange}>{CATEGORIES.map(item => <option key={item}>{item}</option>)}</select></label><label>Ngày chi<input name="date" type="date" value={form.date} onChange={handleChange} />{errors.date && <small>{errors.date}</small>}</label><button className="primary" type="submit" disabled={submitting}>{submitting ? 'Đang thêm…' : 'Thêm khoản chi'}</button></div></form>
+  return <form className="card form" onSubmit={handleSubmit} noValidate><div className="section-title"><h2>Ghi khoản chi</h2></div><div className="form-grid"><label className="wide">Nội dung<input ref={contentRef} name="content" value={form.content} onChange={handleChange} placeholder="Ví dụ: Ăn trưa" />{errors.content && <small>{errors.content}</small>}</label><label>Số tiền (đ)<input name="amount" type="number" min="1" value={form.amount} onChange={handleChange} placeholder="50000" />{errors.amount && <small>{errors.amount}</small>}</label><label>Loại<select name="category" value={form.category} onChange={handleChange}>{CATEGORIES.map(item => <option key={item}>{item}</option>)}</select></label><label>Ngày chi<input name="date" type="date" value={form.date} onChange={handleChange} />{errors.date && <small>{errors.date}</small>}</label><button className="primary" type="submit" disabled={submitting}>{submitting ? 'Đang thêm…' : 'Thêm khoản chi'}</button></div></form>
 }
 
 function Filters({ value, onChange, search, onSearch }) {
-  return <div className="toolbar"><div className="filters" aria-label="Lọc theo loại">{['Tất cả', ...CATEGORIES].map(item => <button key={item} className={value === item ? 'active' : ''} onClick={() => onChange(item)}>{item}</button>)}</div><label className="search"><span>Tìm kiếm</span><input value={search} onChange={event => onSearch(event.target.value)} placeholder="Nhập nội dung…" /></label></div>
+  return (
+    <div className="toolbar">
+      <label className="search">
+        Tìm theo nội dung
+        <input type="search" value={search} onChange={event => onSearch(event.target.value)} placeholder="Nhập nội dung…" />
+      </label>
+      <div className="filters" aria-label="Lọc theo loại">
+        {['Tất cả', ...CATEGORIES].map(item => (
+          <button key={item} className={value === item ? 'active' : ''} aria-pressed={value === item} onClick={() => onChange(item)}>
+            {item}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function ExpenseList({ expenses, onDelete, deletingId }) {
-  if (!expenses.length) return <div className="card list-card"><p className="empty">Không có khoản chi phù hợp.</p></div>
-  return <div className="card list-card"><div className="section-title"><div><p className="eyebrow">LỊCH SỬ</p><h2>Danh sách khoản chi</h2></div><strong>{expenses.length} khoản</strong></div><div className="expense-list">{expenses.map(item => <article className="expense" key={item.id}><span className={`category c-${CATEGORIES.indexOf(item.category)}`}>{item.category}</span><div><h3>{item.content}</h3><time>{new Date(`${item.date}T00:00:00`).toLocaleDateString('vi-VN')}</time></div><strong>{MONEY.format(item.amount)}</strong><button className="delete" disabled={deletingId === item.id} onClick={() => onDelete(item)}>{deletingId === item.id ? 'Đang xóa…' : 'Xóa'}</button></article>)}</div></div>
+  if (!expenses.length) return <div className="card list-card"><h2>Danh sách khoản chi</h2><p className="empty">Không có khoản chi phù hợp.</p></div>
+  return <div className="card list-card"><div className="section-title"><h2>Danh sách khoản chi</h2><strong>{expenses.length} khoản</strong></div><div className="expense-list">{expenses.map(item => <article className="expense" key={item.id}><div><h3>{item.content}</h3><time>{new Date(`${item.date}T00:00:00`).toLocaleDateString('vi-VN')}</time></div><span className="category">{item.category}</span><strong>{MONEY.format(item.amount)}</strong><button className="delete" disabled={deletingId === item.id} onClick={() => onDelete(item)}>{deletingId === item.id ? 'Đang xóa…' : 'Xóa'}</button></article>)}</div></div>
 }
 
 function Statistics({ total, expenses }) {
@@ -66,7 +80,6 @@ export default function App() {
         />
         <ExpenseWorkspace key={connection.revision} url={connection.url} setBusy={setBusy} />
       </main>
-      <footer>Function Components + Hooks · React</footer>
     </>
   )
 }
@@ -106,15 +119,19 @@ function ExpenseWorkspace({ url, setBusy }) {
 
   return (
     <>
-      <Statistics total={total} expenses={expenses} />
       {error && <div className="notice error" role="alert"><strong>Không thể đồng bộ MockAPI.</strong><span>{error}</span></div>}
       {loading && <div className="card loading" role="status">Đang tải dữ liệu…</div>}
       {data !== null && (
-        <>
-          <ExpenseForm onAdd={handleAdd} submitting={submitting} />
-          <Filters value={filter} onChange={setFilter} search={search} onSearch={setSearch} />
-          <ExpenseList expenses={visible} onDelete={deleteExpense} deletingId={deletingId} />
-        </>
+        <div className="ledger">
+          <div className="entry-column">
+            <ExpenseForm onAdd={handleAdd} submitting={submitting} />
+            <Statistics total={total} expenses={expenses} />
+          </div>
+          <section className="history" aria-label="Tra cứu khoản chi">
+            <Filters value={filter} onChange={setFilter} search={search} onSearch={setSearch} />
+            <ExpenseList expenses={visible} onDelete={deleteExpense} deletingId={deletingId} />
+          </section>
+        </div>
       )}
     </>
   )

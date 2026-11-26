@@ -53,3 +53,9 @@ Tùy chọn: dùng `VITE_API_URL` trong `part-b-hooks/.env` làm giá trị mặ
 - `useRef` focus ô nội dung trực tiếp sau khi thêm thành công.
 - `useContext` chia sẻ chế độ sáng/tối mà không phải truyền props qua nhiều cấp.
 
+## Yêu cầu nâng cao
+
+- Phần B dùng `useClock` để cập nhật đồng hồ mỗi giây và dọn bộ đếm khi ẩn đồng hồ.
+- Cả hai phần thống kê tổng chi theo từng loại trên toàn bộ dữ liệu. Dòng **Tổng đang hiển thị** chỉ tính các khoản khớp với bộ lọc và từ khóa.
+- Cả hai phần tìm theo nội dung với độ trễ 400 ms. Phần A dọn `setTimeout` bằng lifecycle của Class, Phần B dùng `useDebounce`.
+

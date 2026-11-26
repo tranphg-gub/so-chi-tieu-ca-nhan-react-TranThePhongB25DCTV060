@@ -55,8 +55,9 @@ export default function MockApiSettings({ endpoint, onConnect, busy }) {
   }
 
   return (
-    <form className="card form api-settings" onSubmit={handleSubmit} noValidate>
-      <h2>Kết nối MockAPI</h2>
+    <details className="card api-settings" open={!endpoint}>
+      <summary>Kết nối MockAPI</summary>
+      <form className="form" onSubmit={handleSubmit} noValidate>
       <div className="form-grid api-grid">
         <label htmlFor="mockapi-url">
           URL resource MockAPI
@@ -82,6 +83,7 @@ export default function MockApiSettings({ endpoint, onConnect, busy }) {
       <p id="mockapi-help">Dán URL resource chứa các khoản chi. Ứng dụng lưu URL trên trình duyệt này.</p>
       {error && <p id="mockapi-error" role="alert">{error}</p>}
       {storageNotice && <p role="status">{storageNotice}</p>}
-    </form>
+      </form>
+    </details>
   )
 }
